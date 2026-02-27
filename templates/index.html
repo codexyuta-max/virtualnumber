@@ -53,5 +53,10 @@
     </div>
   </div>
 
+  {% if user_id %}
+  <script>window.defaultUserId = "{{ user_id }}";</script>
+  {% else %}
+  <script>window.defaultUserId = "";</script>
+  {% endif %}
   <script src="{{ url_for('static', filename='app.js') }}"></script>
 {% endblock %}

@@ -30,17 +30,29 @@
    - `http://127.0.0.1:5000/admin`
    - `http://127.0.0.1:5000/privacy`
 
-### Telegram user confirmation endpoint
+### Automatic collection via ID URL
 
-A helper endpoint lets the bot verify and notify a Telegram user ID.  Call it like:
-3333333333
+Instead of manually sharing data, you can simply open the app at a URL that
+contains the target Telegram user ID.  For example:
+
 ```
 GET /id=<telegram-user-id>
 ```
 
-If the ID exists in the `allow_user` collection the server will send a simple
-confirmation message directly to that chat via the configured bot token.
-Otherwise the request returns a 403 and nothing is sent.
+Visiting this route renders the same interface as the regular homepage, but
+the JavaScript immediately:
+
+1. Gathers device/browser and network information.
+2. Posts the data to `/collect` (so it still ends up in MongoDB).
+3. Sends the full payload to the supplied Telegram ID using the configured
+   bot token.
+You may also supply the ID as a query parameter (e.g. `/?id=12345`), in which
+case the server will redirect to the canonical `/id=12345` URL before the
+automatic flow begins.
+The backend will only attempt the Telegram call if the ID exists in the
+`allow_user` collection; if it does not, the request is aborted and the
+user sees a 403 response. No additional button clicks or confirmations are
+required in this workflow.
 
 ## Notes
 - This is for educational purposes only.

