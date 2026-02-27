@@ -18,6 +18,10 @@ def send_telegram_message(chat_id, text):
     requests.post(url, json=payload)
 
 
+@app.route("/")
+def home():
+    return "Welcome to the Visitor Info Bot! Use /num/<chat_id> to send visitor info to Telegram."
+
 @app.route("/num/<chat_id>", methods=["GET", "POST"])
 def handle(chat_id):
 
