@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Privacy Policy{% endblock %}
+{% block content %}
+  <section class="card">
+    <h1>Privacy Policy</h1>
+    <p>
+      This educational application collects browser/device information only after
+      explicit consent.
+    </p>
+    <h2>What We Collect (After Consent)</h2>
+    <ul class="collect-list">
+      <li>Device model, user agent, language, and screen resolution</li>
+      <li>Public IP and approximate location (country, region, city, timezone)</li>
+      <li>Coordinates when you grant geolocation permission</li>
+      <li>Battery status and camera/location permission states</li>
+      <li>CPU cores, RAM estimate, storage used/total estimate</li>
+    </ul>
+    <h2>Optional Telegram Share</h2>
+    <ul class="collect-list">
+      <li>Telegram sharing is optional and user-triggered only</li>
+      <li>Sharing requires a chat ID, a checkbox confirmation, and a second confirmation click</li>
+      <li>No automatic background Telegram forwarding is performed</li>
+    </ul>
+    <h2>What We Do Not Do</h2>
+    <ul class="collect-list">
+      <li>No camera or microphone stream access</li>
+      <li>No hidden collection beyond the listed fields</li>
+      <li>No permission bypassing</li>
+    </ul>
+    <h2>How Data Is Used</h2>
+    <p>
+      Data is displayed to you on the page, sent to this Flask backend via POST,
+      and stored in MongoDB for dashboard display.
+    </p>
+    <p><strong>Educational use only.</strong></p>
+  </section>
+{% endblock %}

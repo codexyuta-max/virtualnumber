@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Device Info Demo{% endblock %}
+{% block content %}
+  <section class="card">
+    <h1>Consent-Based Device Information Demo</h1>
+    <p>
+      This app requests consent first. If you allow, it collects the fields below,
+      displays them on this page, and sends them to the backend for storage.
+    </p>
+    <ul class="collect-list">
+      <li>Device model and user agent</li>
+      <li>Language and screen resolution</li>
+      <li>Public IP and approximate location (country/region/city/timezone)</li>
+      <li>Coordinates only if geolocation permission is granted</li>
+      <li>Battery status, camera/location permission states</li>
+      <li>CPU cores, RAM estimate, and storage estimate</li>
+    </ul>
+    <button id="open-consent" class="btn">Review Consent</button>
+  </section>
+
+  <section class="card">
+    <h2>Collected Information</h2>
+    <div id="result" class="result empty">No data collected yet.</div>
+  </section>
+
+  <section class="card">
+    <h2>Optional Manual Telegram Share</h2>
+    <p>
+      This is optional and never automatic. Review data above first, then choose
+      whether to send it to the preconfigured Telegram recipient.
+    </p>
+    <div class="form-row">
+      <label for="share-user-id">Allowed User ID</label>
+      <input id="share-user-id" type="text" placeholder="Enter your allowed user ID" />
+    </div>
+    <div class="form-row checkbox-row">
+      <input id="telegram-confirm" type="checkbox" />
+      <label for="telegram-confirm">I confirm I want to send the displayed data to Telegram.</label>
+    </div>
+    <button id="telegram-send-btn" class="btn" disabled>Send to Telegram</button>
+    <p id="telegram-status" class="muted-text">Collect data first to enable sharing.</p>
+  </section>
+
+  <div id="consent-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="consent-title">
+    <div class="modal-content">
+      <h2 id="consent-title">Your Consent Is Required</h2>
+      <p>We will collect only the listed fields and store them in MongoDB for this educational demo.</p>
+      <p>This app does not access camera or microphone streams. No hidden permission bypassing is used.</p>
+      <div class="modal-actions">
+        <button id="deny-btn" class="btn secondary">Deny</button>
+        <button id="allow-btn" class="btn">Allow</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='app.js') }}"></script>
+{% endblock %}
