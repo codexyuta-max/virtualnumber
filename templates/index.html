@@ -1,16 +1,129 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Consent Demo</title>
+  <title>Virtual Number Buy</title>
   <style>
-    body { font-family: Arial; padding: 30px; }
+    body { font-family: Arial; padding: 30px; background: #f4f8ff; margin: 0; }
+    .unneccary { display: none; }
     .card { margin-bottom: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
     .btn { padding: 10px 15px; cursor: pointer; }
     .hidden { display: none; }
+    .buy-wrap { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+    .hero {
+      background: linear-gradient(120deg, #072a40, #0f766e);
+      color: #fff;
+      border-radius: 14px;
+      padding: 28px;
+      margin-bottom: 18px;
+    }
+    .hero h1 { margin: 0 0 10px; font-size: 32px; }
+    .hero p { margin: 0; opacity: 0.92; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+    .plan {
+      background: #fff;
+      border: 1px solid #d8e1f0;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 6px 16px rgba(10, 30, 60, 0.06);
+    }
+    .plan h3 { margin: 0 0 8px; }
+    .price { font-weight: 700; margin-bottom: 8px; color: #0f766e; }
+    .plan ul { padding-left: 18px; margin: 8px 0 14px; }
+    .search-card {
+      background: #fff;
+      border: 1px solid #d8e1f0;
+      border-radius: 12px;
+      padding: 18px;
+      margin-top: 14px;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .form-grid input, .form-grid select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #c8d2e1;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .buy-btn {
+      background: #0f766e;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-weight: 700;
+      margin-top: 10px;
+    }
+    .unneccary { max-width: 1100px; margin: 20px auto; padding: 0 20px 20px; }
   </style>
 </head>
 <body>
 
+<section class="buy-wrap">
+  <div class="hero">
+    <h1>Buy Virtual Numbers Instantly</h1>
+    <p>Get secure temporary or long-term numbers for OTP, messaging, and business verification.</p>
+  </div>
+
+  <div class="grid">
+    <div class="plan">
+      <h3>Starter</h3>
+      <div class="price">$2.99 / number</div>
+      <ul>
+        <li>SMS receive enabled</li>
+        <li>20+ countries</li>
+        <li>24-hour validity</li>
+      </ul>
+      <button class="buy-btn" type="button">Choose Starter</button>
+    </div>
+
+    <div class="plan">
+      <h3>Business</h3>
+      <div class="price">$9.99 / month</div>
+      <ul>
+        <li>Voice + SMS support</li>
+        <li>Priority activation</li>
+        <li>Dedicated dashboard</li>
+      </ul>
+      <button class="buy-btn" type="button">Choose Business</button>
+    </div>
+
+    <div class="plan">
+      <h3>Enterprise</h3>
+      <div class="price">$29.99 / month</div>
+      <ul>
+        <li>Bulk number purchase</li>
+        <li>API integration</li>
+        <li>Premium support</li>
+      </ul>
+      <button class="buy-btn" type="button">Choose Enterprise</button>
+    </div>
+  </div>
+
+  <div class="search-card">
+    <h2>Find Your Virtual Number</h2>
+    <div class="form-grid">
+      <select>
+        <option>United States</option>
+        <option>United Kingdom</option>
+        <option>Canada</option>
+        <option>India</option>
+      </select>
+      <select>
+        <option>SMS Verification</option>
+        <option>Voice Call</option>
+        <option>WhatsApp</option>
+      </select>
+      <input type="text" placeholder="Preferred area code (e.g. 415)" />
+      <input type="text" placeholder="Coupon code (optional)" />
+    </div>
+    <button class="buy-btn" type="button">Search & Buy Number</button>
+  </div>
+</section>
 
 <div class="unneccary">
 <div class="card">
