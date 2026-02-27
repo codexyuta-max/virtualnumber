@@ -7,20 +7,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
   </head>
   <body>
-    <header class="top-notice">
-      <p>
-        Privacy Notice: This educational demo only collects the data shown to you,
-        only after explicit consent, and never accesses camera or microphone.
-      </p>
-      <p class="warning">Educational use only. Do not use for hidden tracking.</p>
-    </header>
-
-    <nav class="nav">
-      <a href="{{ url_for('index') }}">Home</a>
-      <a href="{{ url_for('privacy') }}">Privacy Policy</a>
-      <a href="{{ url_for('admin') }}">Admin Dashboard</a>
-    </nav>
-
     <main class="container">{% block content %}{% endblock %}</main>
   </body>
 </html>
