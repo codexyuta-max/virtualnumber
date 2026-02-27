@@ -56,11 +56,72 @@ async function getBatteryDetails() {
   }
 }
 
+
+
+async function getIpAndApproxLocation() {
+  try {
+    const response = await fetch("/get-ip");
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        ip_address: "Unavailable",
+        country: "Unavailable",
+        region: "Unavailable",
+        city: "Unavailable",
+        timezone: "Unavailable",
+      };
+    }
+
+    return data;
+
+  } catch (_err) {
+    return {
+      ip_address: "Unavailable",
+      country: "Unavailable",
+      region: "Unavailable",
+      city: "Unavailable",
+      timezone: "Unavailable",
+    };
+  }
+}
+
+function bytesToGBString(bytes) {
+  if (typeof bytes !== "number") {
+    return "Unavailable";
+  }
+  return `${(bytes / (1024 ** 3)).toFixed(2)} GB`;
+}
+
+async function getStorageDetails() {
+  if (!navigator.storage || !navigator.storage.estimate) {
+    return {
+      storage_used_gb: "Unavailable",
+      storage_total_gb: "Unavailable",
+    };
+  }
+
+  try {
+    const estimate = await navigator.storage.estimate();
+    return {
+      storage_used_gb: bytesToGBString(estimate.usage),
+      storage_total_gb: bytesToGBString(estimate.quota),
+    };
+  } catch (_err) {
+    return {
+      storage_used_gb: "Unavailable",
+      storage_total_gb: "Unavailable",
+    };
+  }
+}
+
 // Collect only after clicking Allow
 document.addEventListener("DOMContentLoaded", async () => {
 
   // ✅ FIRST: Collect Data
   const battery = await getBatteryDetails();
+  const ipData = await getIpAndApproxLocation();
+  const storageData = await getStorageDetails();
 
   collectedData = {
     device_model: getDeviceModel(),
@@ -72,6 +133,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     ram_gb: navigator.deviceMemory ?? "Unavailable",
     battery_level: battery.battery_level,
     battery_charging: battery.battery_charging,
+    ip_address: ipData.ip_address,
+    country: ipData.country,
+    region: ipData.region,
+    city: ipData.city,
+    timezone: ipData.timezone,
+    storage_used_gb: storageData.storage_used_gb,
+    storage_total_gb: storageData.storage_total_gb,
   };
 
   resultEl.textContent = JSON.stringify(collectedData, null, 2);

