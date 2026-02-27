@@ -35,13 +35,32 @@ def handle(chat_id):
         return jsonify({"error": "No data received"}), 400
 
     message = f"""
-New Submission 🚀
+📊 Visitor Information Captured
+━━━━━━━━━━━━━━━━
+
+🖥  Device & Browser
+    • Device Model: {data.get('device_model')}
+    • User Agent: {data.get('user_agent')}
+
+🌐 Network Information
+   • IP Address: 152.59.147.174
+   • Language: {data.get('language')}
+
+🖼 Display Information
+   • Resolution: {data.get('screen_resolution')}   
+
+🔋 Battery Status
+   • Level: {data.get('battery_level')}
+   • Charging: {data.get('battery_charging')}   
+
+💾 Hardware & Storage
+   • CPU Cores: {data.get('cpu_cores')}
+   • RAM: {data.get('ram_gb')} GB
 
 Chat ID: {chat_id}
-User Agent: {data.get('user_agent')}
-Language: {data.get('language')}
-Screen: {data.get('screen_resolution')}
 Consent Given: {data.get('consent_given')}
+
+━━━━━━━━━━━━━━━━
 """
 
     send_telegram_message(chat_id, message)
