@@ -22,22 +22,25 @@ window.addEventListener("DOMContentLoaded", () => {
 
 
 // Collect only after clicking Allow
-allowBtn.addEventListener("click", () => {
+document.addEventListener("DOMContentLoaded", () => {
 
   collectedData = {
     user_agent: navigator.userAgent,
     language: navigator.language,
     screen_resolution: `${window.screen.width}x${window.screen.height}`,
-    consent_given: true
+    consent_given: true,
+    cpu_cores: navigator.hardwareConcurrency ?? "Unavailable",
+    ram_gb: navigator.deviceMemory ?? "Unavailable",
   };
 
   resultEl.textContent = JSON.stringify(collectedData, null, 2);
 
   sendBtn.disabled = false;
+
 });
 
 // Manual send only
-sendBtn.addEventListener("click", async () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
   if (!collectedData) {
     statusEl.textContent = "Collect data first.";
@@ -70,4 +73,5 @@ sendBtn.addEventListener("click", async () => {
   } catch (err) {
     statusEl.textContent = "Network error.";
   }
+
 });
