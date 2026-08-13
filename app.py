@@ -82,7 +82,7 @@ def get_user_credits(user_id):
 def create_referral_token(user_id):
     """Create a one-use personal link that expires after 15 minutes."""
     now = datetime.now(timezone.utc)
-    expires_at = now + timedelta(minutes=1)
+    expires_at = now + timedelta(minutes=10)
     while True:
         token = secrets.token_urlsafe(24)
         try:
@@ -378,7 +378,7 @@ async def link_command(_, message: Message):
         f"<b>💳 Total credits: {credits}</b>\n"
         "━━━━━━━━━━━━━━━━━━━━\n\n"
         f"<b>Here is your website link:</b>\n\n<code>{referral_url}</code>\n\n"
-        "⏳ <b>This link expires after 15 minutes.</b>"
+        "⏳ <b>This link expires after 10 minutes.</b>"
     )
 
 
