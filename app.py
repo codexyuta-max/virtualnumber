@@ -181,7 +181,7 @@ telegram_bot = None
 
 WELCOME_TEXT = (
     "<b>Welcome!</b>\n\n"
-    "You are now subscribed to all required channels and can use this bot."
+    "/link — Generate Location Finder Link"
 )
 
 
