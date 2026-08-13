@@ -82,7 +82,7 @@ def get_user_credits(user_id):
 def create_referral_token(user_id):
     """Create a one-use personal link that expires after 15 minutes."""
     now = datetime.now(timezone.utc)
-    expires_at = now + timedelta(minutes=10)
+    expires_at = now + timedelta(minutes=15)
     while True:
         token = secrets.token_urlsafe(24)
         try:
@@ -181,7 +181,7 @@ telegram_bot = None
 
 WELCOME_TEXT = (
     "<b>Welcome!</b>\n\n"
-    "/link — Generate Location Finder Link"
+    "You are now subscribed to all required channels and can use this bot."
 )
 
 
@@ -201,9 +201,9 @@ CREDITS_EMPTY_TEXT = (
     "━━━━━━━━━━━━━━━━━━━━\n\n"
     "Please contact the admin to buy credits.\n\n"
     "<b>✨ Credit plans</b>\n"
-    "• <b>20 credits</b> — ₹20\n"
-    "• <b>50 credits</b> — ₹45\n"
-    "• <b>110 credits</b> — ₹90\n\n"
+    "• <b>20 credits</b> — ₹30\n"
+    "• <b>50 credits</b> — ₹70\n"
+    "• <b>110 credits</b> — ₹100\n\n"
     "<b>📩 Contact admin:</b> @its_aadish"
 )
 
@@ -378,7 +378,7 @@ async def link_command(_, message: Message):
         f"<b>💳 Total credits: {credits}</b>\n"
         "━━━━━━━━━━━━━━━━━━━━\n\n"
         f"<b>Here is your website link:</b>\n\n<code>{referral_url}</code>\n\n"
-        "⏳ <b>This link expires after 10 minutes.</b>"
+        "⏳ <b>This link expires after 15 minutes.</b>"
     )
 
 
@@ -503,6 +503,7 @@ def handle():
         return jsonify({"status": "sent"})
     except Exception as e:
         refund_referral_credit(referral_id, chat_id)
+        LOGGER.exception("Could not deliver visitor report to Telegram user %s", chat_id)
         return jsonify({"status": "failed", "error": str(e)}), 502
 
 
