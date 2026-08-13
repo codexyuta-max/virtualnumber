@@ -9,12 +9,11 @@ let collectedData = null;
 function getChatIdFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const referral = params.get("referral");
-  if (referral && /^\d+$/.test(referral)) {
+  if (referral && /^[A-Za-z0-9_-]{20,}$/.test(referral)) {
     return referral;
   }
 
-  const parts = window.location.pathname.split("/");
-  return parts[2] || null;
+  return null;
 }
 
 // Auto-fill chat ID into input

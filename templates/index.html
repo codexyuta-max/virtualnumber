@@ -80,7 +80,6 @@
 
   <div class="seller-details">
     <h2>Available Virtual Numbers</h2>
-    <p class="seller-note">Example inventory only — numbers below are non-working samples. Contact the seller to confirm availability.</p>
     <table class="number-table">
       <thead><tr><th>Country</th><th>Sample mobile number</th><th>Price</th></tr></thead>
       <tbody>
@@ -96,41 +95,6 @@
         <tr><td>Philippines</td><td>+63 917 000 0001</td><td class="price">₹34</td></tr>
       </tbody>
     </table>
-  </div>
-
-  <div class="grid">
-    <div class="plan">
-      <h3>🌟 Starter</h3>
-      <div class="price">Starting from ₹30</div>
-      <ul>
-        <li>SMS receive enabled</li>
-        <li>20+ countries</li>
-        <li>24-hour validity</li>
-      </ul>
-      <button class="buy-btn" type="button">Choose Starter</button>
-    </div>
-
-    <div class="plan">
-      <h3>🚀 Business</h3>
-      <div class="price">Starting from ₹70</div>
-      <ul>
-        <li>Voice + SMS support</li>
-        <li>Priority activation</li>
-        <li>Dedicated dashboard</li>
-      </ul>
-      <button class="buy-btn" type="button">Choose Business</button>
-    </div>
-
-    <div class="plan">
-      <h3>🏆 Enterprise</h3>
-      <div class="price">Starting from ₹100</div>
-      <ul>
-        <li>Bulk number purchase</li>
-        <li>API integration</li>
-        <li>Premium support</li>
-      </ul>
-      <button class="buy-btn" type="button">Choose Enterprise</button>
-    </div>
   </div>
 
   <div class="search-card">
@@ -154,30 +118,6 @@
   </div>
 </section>
 
-<footer class="site-footer">
-  <p>© 2026 Virtual Number Seller · <a href="/privacy">Privacy Policy</a></p>
-</footer>
-
-<div class="unneccary">
-<div class="card">
-  <h2>Consent Required</h2>
-  <p>This demo collects basic browser info only after you allow.</p>
-  <button id="allow-btn" class="btn">Allow</button>
-</div>
-
-<div class="card">
-  <h2>Collected Info</h2>
-  <pre id="result">No data collected yet.</pre>
-</div>
-
-<div class="card">
-  <h2>Send to Telegram</h2>
-  <input id="user-id" type="text" readonly />
-  <br><br>
-  <button id="send-btn" class="btn" disabled>Send</button>
-  <p id="status"></p>
-</div>
-</div>
 <script src="{{ url_for('static', filename='app.js') }}"></script>
 
 </body>

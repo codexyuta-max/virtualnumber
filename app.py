@@ -4,9 +4,12 @@ import os
 import threading
 import asyncio
 import logging
-from datetime import datetime, timezone
+import secrets
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 from pymongo import MongoClient
+from pymongo import ReturnDocument
+from pymongo.errors import DuplicateKeyError
 from pyrogram import Client, filters
 from pyrogram.enums import ButtonStyle, ChatMemberStatus
 from pyrogram.errors import RPCError
@@ -36,7 +39,14 @@ users_collection = mongo_client[
 pending_requests_collection = mongo_client[
     os.getenv("MONGODB_DB", "privacy_demo")
 ][os.getenv("PENDING_JOIN_REQUEST_COLLECTION", "pending_join_requests")]
+referral_tokens_collection = mongo_client[
+    os.getenv("MONGODB_DB", "privacy_demo")
+][os.getenv("REFERRAL_TOKEN_COLLECTION", "referral_tokens")]
 PENDING_JOIN_REQUESTS = {}
+
+# MongoDB removes expired documents automatically (normally within about a minute).
+referral_tokens_collection.create_index("expires_at", expireAfterSeconds=0)
+referral_tokens_collection.create_index("token", unique=True)
 
 
 def save_user_data(user):
@@ -67,6 +77,67 @@ def get_user_credits(user_id):
     """Return the user's current credit balance, defaulting to zero."""
     user = users_collection.find_one({"telegram_id": user_id}, {"credits": 1})
     return int((user or {}).get("credits", 0))
+
+
+def create_referral_token(user_id):
+    """Create a one-use personal link that expires after 15 minutes."""
+    now = datetime.now(timezone.utc)
+    expires_at = now + timedelta(minutes=1)
+    while True:
+        token = secrets.token_urlsafe(24)
+        try:
+            referral_tokens_collection.insert_one({
+                "token": token,
+                "telegram_id": user_id,
+                "created_at": now,
+                "expires_at": expires_at,
+            })
+            return token, expires_at
+        except DuplicateKeyError:
+            # A collision is extremely unlikely; safely make another token.
+            continue
+
+
+def use_referral_token(token):
+    """Atomically validate a token and consume one credit from its owner."""
+    now = datetime.now(timezone.utc)
+    referral = referral_tokens_collection.find_one_and_update(
+        {"token": token, "expires_at": {"$gt": now}, "used_at": {"$exists": False}},
+        {"$set": {"used_at": now}},
+        return_document=ReturnDocument.BEFORE,
+    )
+    if not referral:
+        return None
+
+    user = users_collection.find_one_and_update(
+        {"telegram_id": referral["telegram_id"], "credits": {"$gt": 0}},
+        {"$inc": {"credits": -1}, "$set": {"updated_at": now}},
+        return_document=ReturnDocument.AFTER,
+    )
+    if not user:
+        referral_tokens_collection.update_one(
+            {"_id": referral["_id"]},
+            {"$unset": {"used_at": ""}},
+        )
+        return None
+    return referral["telegram_id"], int(user["credits"]), referral["_id"]
+
+
+def refund_referral_credit(referral_id, user_id):
+    """Return a credit if Telegram delivery fails after the token was consumed."""
+    referral_tokens_collection.update_one({"_id": referral_id}, {"$unset": {"used_at": ""}})
+    users_collection.update_one({"telegram_id": user_id}, {"$inc": {"credits": 1}})
+
+
+def referral_token_is_active(token):
+    return referral_tokens_collection.find_one(
+        {
+            "token": token,
+            "expires_at": {"$gt": datetime.now(timezone.utc)},
+            "used_at": {"$exists": False},
+        },
+        {"_id": 1},
+    ) is not None
 
 
 def save_pending_join_request(chat_id, user_id):
@@ -301,11 +372,13 @@ async def link_command(_, message: Message):
         await message.reply_text("Website link is not configured. Ask the bot owner to set WEBSITE_URL.")
         return
 
-    referral_url = f"{website_url}/virtual_number?referral={message.from_user.id}"
+    token, _expires_at = await asyncio.to_thread(create_referral_token, message.from_user.id)
+    referral_url = f"{website_url}/virtual_number?referral={token}"
     await message.reply_text(
         f"<b>💳 Total credits: {credits}</b>\n"
         "━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"<b>Here is your website link:</b>\n\n<code>{referral_url}</code>"
+        f"<b>Here is your website link:</b>\n\n<code>{referral_url}</code>\n\n"
+        "⏳ <b>This link expires after 15 minutes.</b>"
     )
 
 
@@ -354,14 +427,16 @@ def privacy():
 
 @app.route("/virtual_number", methods=["GET", "POST"])
 def handle():
-    chat_id = request.args.get("referral")
+    referral_token = request.args.get("referral", "")
 
-    if chat_id is None or not str(chat_id).isdigit():
-        return "Invalid Chat ID", 400
+    if not referral_token:
+        return "Invalid or missing referral link", 400
 
     # GET → Render page
     if request.method == "GET":
-        return render_template("index.html", referral=chat_id)
+        if not referral_token_is_active(referral_token):
+            return "This referral link has expired", 410
+        return render_template("index.html", referral=referral_token)
 
     # POST → Send to Telegram
     data = request.get_json()
@@ -417,10 +492,17 @@ def handle():
 ━━━━━━━━━━━━━━━━
 """
 
+    token_use = use_referral_token(referral_token)
+    if not token_use:
+        return jsonify({"status": "failed", "error": "Link expired, already used, or no credits remain"}), 410
+
+    chat_id, credits_remaining, referral_id = token_use
+    message += f"\n💳 Credits remaining: {credits_remaining}\n"
     try:
         send_telegram_message(chat_id, message)
         return jsonify({"status": "sent"})
     except Exception as e:
+        refund_referral_credit(referral_id, chat_id)
         return jsonify({"status": "failed", "error": str(e)}), 502
 
 
