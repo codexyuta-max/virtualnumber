@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Number Seller</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <style>
+    .seller-home { min-height: 100vh; display: flex; flex-direction: column; }
+    .seller-hero { flex: 1; display: grid; place-items: center; padding: 3rem 1rem; text-align: center; }
+    .seller-hero__content { max-width: 800px; }
+    .seller-hero h1 { margin: 0; font-size: clamp(3rem, 10vw, 6.5rem); line-height: .95; color: #312e81; letter-spacing: -.05em; }
+    .seller-hero p { font-size: clamp(1.1rem, 2vw, 1.4rem); color: #334155; margin: 1.4rem auto; max-width: 650px; }
+    .seller-hero a { display: inline-block; padding: .8rem 1.1rem; color: #fff; background: linear-gradient(90deg, #4f46e5, #0891b2); border-radius: 999px; font-weight: 700; text-decoration: none; }
+  </style>
+</head>
+<body class="seller-home">
+  <main class="seller-hero">
+    <div class="seller-hero__content">
+      <h1>VIRTUAL<br>NUMBER SELLER</h1>
+      <p>Reliable virtual numbers for OTP, messaging, verification, and business use.</p>
+      <a href="/privacy">Read our Privacy Policy</a>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <p>© 2026 Virtual Number Seller · <a href="/privacy">Privacy Policy</a></p>
+  </footer>
+</body>
+</html>

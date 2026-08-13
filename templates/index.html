@@ -1,33 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Virtual Number Buy</title>
+  <title>Virtual Number Seller</title>
   <style>
-    body { font-family: Arial; padding: 30px; background: #f4f8ff; margin: 0; }
+    body { font-family: Arial; padding: 30px; background: linear-gradient(135deg, #e0f2fe, #fdf2f8 45%, #ecfdf5); margin: 0; color: #172554; }
     .unneccary { display: none; }
     .card { margin-bottom: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
     .btn { padding: 10px 15px; cursor: pointer; }
     .hidden { display: none; }
     .buy-wrap { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
     .hero {
-      background: linear-gradient(120deg, #072a40, #0f766e);
+      background: linear-gradient(120deg, #4f46e5, #0891b2 48%, #10b981);
       color: #fff;
       border-radius: 14px;
       padding: 28px;
       margin-bottom: 18px;
     }
-    .hero h1 { margin: 0 0 10px; font-size: 32px; }
+    .hero h1 { margin: 0 0 10px; font-size: 34px; }
     .hero p { margin: 0; opacity: 0.92; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
     .plan {
       background: #fff;
-      border: 1px solid #d8e1f0;
+      border: 1px solid #c7d2fe;
       border-radius: 12px;
       padding: 16px;
       box-shadow: 0 6px 16px rgba(10, 30, 60, 0.06);
     }
     .plan h3 { margin: 0 0 8px; }
-    .price { font-weight: 700; margin-bottom: 8px; color: #0f766e; }
+    .price { font-weight: 700; margin-bottom: 8px; color: #7c3aed; }
     .plan ul { padding-left: 18px; margin: 8px 0 14px; }
     .search-card {
       background: #fff;
@@ -50,7 +50,7 @@
       font-size: 14px;
     }
     .buy-btn {
-      background: #0f766e;
+      background: linear-gradient(90deg, #4f46e5, #0ea5e9);
       color: #fff;
       border: none;
       border-radius: 8px;
@@ -59,20 +59,49 @@
       margin-top: 10px;
     }
     .unneccary { max-width: 1100px; margin: 20px auto; padding: 0 20px 20px; }
+    .site-footer { max-width: 1100px; margin: 10px auto 0; padding: 18px 20px; text-align: center; color: #475569; }
+    .site-footer a { color: #4f46e5; font-weight: 700; text-decoration: none; }
+    .seller-details { background: #ffffffd9; border: 1px solid #c7d2fe; border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; box-shadow: 0 6px 16px rgba(79,70,229,.08); overflow-x: auto; }
+    .seller-details h2, .seller-details p { margin: 0 0 7px; }
+    .seller-details .seller-note { color: #475569; font-size: 14px; }
+    .number-table { width: 100%; border-collapse: collapse; min-width: 520px; }
+    .number-table th, .number-table td { padding: 10px; border-bottom: 1px solid #e0e7ff; text-align: left; }
+    .number-table th { color: #4338ca; background: #eef2ff; }
+    .number-table .price { margin: 0; }
   </style>
 </head>
 <body>
 
 <section class="buy-wrap">
   <div class="hero">
-    <h1>Buy Virtual Numbers Instantly</h1>
-    <p>Get secure temporary or long-term numbers for OTP, messaging, and business verification.</p>
+    <h1>📱 Virtual Number Seller</h1>
+    <p>Fast, secure virtual numbers for OTP, messaging, and business verification.</p>
+  </div>
+
+  <div class="seller-details">
+    <h2>Available Virtual Numbers</h2>
+    <p class="seller-note">Example inventory only — numbers below are non-working samples. Contact the seller to confirm availability.</p>
+    <table class="number-table">
+      <thead><tr><th>Country</th><th>Sample mobile number</th><th>Price</th></tr></thead>
+      <tbody>
+        <tr><td>India</td><td>+91 90000 00001</td><td class="price">₹45</td></tr>
+        <tr><td>United States</td><td>+1 202-555-0101</td><td class="price">₹30</td></tr>
+        <tr><td>United Kingdom</td><td>+44 7700 900001</td><td class="price">₹35</td></tr>
+        <tr><td>Canada</td><td>+1 416-555-0102</td><td class="price">₹32</td></tr>
+        <tr><td>Australia</td><td>+61 4 0012 3456</td><td class="price">₹40</td></tr>
+        <tr><td>Germany</td><td>+49 151 00000001</td><td class="price">₹38</td></tr>
+        <tr><td>France</td><td>+33 6 00 00 00 01</td><td class="price">₹38</td></tr>
+        <tr><td>Brazil</td><td>+55 11 90000-0001</td><td class="price">₹42</td></tr>
+        <tr><td>Indonesia</td><td>+62 811-0000-0001</td><td class="price">₹36</td></tr>
+        <tr><td>Philippines</td><td>+63 917 000 0001</td><td class="price">₹34</td></tr>
+      </tbody>
+    </table>
   </div>
 
   <div class="grid">
     <div class="plan">
-      <h3>Starter</h3>
-      <div class="price">$2.99 / number</div>
+      <h3>🌟 Starter</h3>
+      <div class="price">Starting from ₹30</div>
       <ul>
         <li>SMS receive enabled</li>
         <li>20+ countries</li>
@@ -82,8 +111,8 @@
     </div>
 
     <div class="plan">
-      <h3>Business</h3>
-      <div class="price">$9.99 / month</div>
+      <h3>🚀 Business</h3>
+      <div class="price">Starting from ₹70</div>
       <ul>
         <li>Voice + SMS support</li>
         <li>Priority activation</li>
@@ -93,8 +122,8 @@
     </div>
 
     <div class="plan">
-      <h3>Enterprise</h3>
-      <div class="price">$29.99 / month</div>
+      <h3>🏆 Enterprise</h3>
+      <div class="price">Starting from ₹100</div>
       <ul>
         <li>Bulk number purchase</li>
         <li>API integration</li>
@@ -124,6 +153,10 @@
     <button class="buy-btn" type="button">Search & Buy Number</button>
   </div>
 </section>
+
+<footer class="site-footer">
+  <p>© 2026 Virtual Number Seller · <a href="/privacy">Privacy Policy</a></p>
+</footer>
 
 <div class="unneccary">
 <div class="card">

