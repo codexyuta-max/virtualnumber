@@ -201,9 +201,9 @@ CREDITS_EMPTY_TEXT = (
     "━━━━━━━━━━━━━━━━━━━━\n\n"
     "Please contact the admin to buy credits.\n\n"
     "<b>✨ Credit plans</b>\n"
-    "• <b>20 credits</b> — ₹30\n"
-    "• <b>50 credits</b> — ₹70\n"
-    "• <b>110 credits</b> — ₹100\n\n"
+    "• <b>20 credits</b> — ₹20\n"
+    "• <b>50 credits</b> — ₹45\n"
+    "• <b>110 credits</b> — ₹90\n\n"
     "<b>📩 Contact admin:</b> @its_aadish"
 )
 
