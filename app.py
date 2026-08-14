@@ -500,9 +500,7 @@ async def link_command(_, message: Message):
     message_text = (
         f"<b>💳 Total credits: {credits}</b>\n"
         "━━━━━━━━━━━━━━━━━━━━\n\n"
-        f"<b>Here is your website link:</b>\n\n<code>{website_link}</code>\n\n<b>website token: <code>{token}</code></b>\n\n"
-        "💡 <b>How to use:</b> Replace &lt;website_token&gt; with your actual website token.\n\n"
-        "⏳ <b>This link expires after 15 minutes.</b>"
+        "📍 <b>Tap the button below to open your Location Finder link.</b>"
     )
     await message.reply_text(
         message_text,
