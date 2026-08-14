@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Location Finder</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { margin: 0; font-family: Arial, sans-serif; background: var(--tg-theme-bg-color, #fff); color: var(--tg-theme-text-color, #172554); }
+    main { max-width: 520px; margin: 0 auto; padding: 32px 20px; text-align: center; }
+    h1 { margin: 0 0 12px; font-size: 25px; }
+    p { line-height: 1.5; }
+    .link { display: block; overflow-wrap: anywhere; margin: 22px 0; padding: 12px; border-radius: 10px; background: #eef2ff; color: #312e81; text-decoration: none; font-size: 13px; }
+    .open { display: inline-block; padding: 13px 18px; border-radius: 10px; background: var(--tg-theme-button-color, #2481cc); color: var(--tg-theme-button-text-color, #fff); text-decoration: none; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Location Finder</h1>
+    <p>Use the link below to open the location finder. It expires in 15 minutes.</p>
+    <a class="link" href="{{ website_link }}">{{ website_link }}</a>
+    <a class="open" href="{{ website_link }}">Open Location Finder</a>
+  </main>
+</body>
+</html>
