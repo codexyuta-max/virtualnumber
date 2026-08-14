@@ -6,6 +6,7 @@ import asyncio
 import logging
 import secrets
 from datetime import datetime, timedelta, timezone
+from urllib.parse import urlparse
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from pymongo import ReturnDocument
@@ -14,7 +15,7 @@ from pyrogram import Client, filters
 from pyrogram.enums import ButtonStyle, ChatMemberStatus
 from pyrogram.errors import RPCError
 from pyrogram.handlers import CallbackQueryHandler, ChatJoinRequestHandler, MessageHandler
-from pyrogram.types import ChatJoinRequest, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
+from pyrogram.types import ChatJoinRequest, CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message, WebAppInfo
 
 load_dotenv()
 
@@ -218,7 +219,13 @@ WELCOME_TEXT = (
     "<b>Available commands:</b>\n"
     "/link — Generate Location Finder Link\n"
     "/refer — Get your referral link and earn credits\n"
-    "/credit — Check your current credits"
+    "/credit — Check your current credits\n\n"
+    "<b>⚠️ Important:</b>\n"
+    "• This bot is for educational purposes only\n"
+    "• Do not use for illegal activities\n"
+    "• Users are responsible for their actions\n"
+    "• Unauthorized use is strictly prohibited\n"
+    "• Your results messages will be auto-deleted after 300 seconds\n"
 )
 
 
@@ -479,15 +486,29 @@ async def link_command(_, message: Message):
     if not website_url:
         await message.reply_text("Website link is not configured. Ask the bot owner to set WEBSITE_URL.")
         return
+    parsed_website_url = urlparse(website_url)
+    if parsed_website_url.scheme != "https" or not parsed_website_url.netloc:
+        await message.reply_text(
+            "The Location Finder Mini App needs a public HTTPS WEBSITE_URL. "
+            "Set WEBSITE_URL to your deployed domain, then try again."
+        )
+        return
 
     token, _expires_at = await asyncio.to_thread(create_referral_token, message.from_user.id)
-    website_link = f"{website_url}/virtual_number?referral=&lt;website_token&gt;"
-    await message.reply_text(
+    website_link = f"{website_url}/virtual_number?referral={token}"
+    mini_app_url = f"{website_url}/mini-app?referral={token}"
+    message_text = (
         f"<b>💳 Total credits: {credits}</b>\n"
         "━━━━━━━━━━━━━━━━━━━━\n\n"
         f"<b>Here is your website link:</b>\n\n<code>{website_link}</code>\n\n<b>website token: <code>{token}</code></b>\n\n"
         "💡 <b>How to use:</b> Replace &lt;website_token&gt; with your actual website token.\n\n"
         "⏳ <b>This link expires after 15 minutes.</b>"
+    )
+    await message.reply_text(
+        message_text,
+        reply_markup=InlineKeyboardMarkup(
+            [[InlineKeyboardButton("📍 Open Location Finder", web_app=WebAppInfo(url=mini_app_url))]]
+        ),
     )
 
 
@@ -538,6 +559,21 @@ def home():
 @app.route("/privacy")
 def privacy():
     return render_template("privacy.html")
+
+
+@app.route("/mini-app")
+def mini_app():
+    """Show the location-finder link inside the Telegram Mini App."""
+    referral_token = request.args.get("referral", "")
+    if not referral_token or not referral_token_is_active(referral_token):
+        return "This referral link has expired", 410
+
+    website_url = os.getenv("WEBSITE_URL", "").rstrip("/")
+    if not website_url:
+        return "Website link is not configured", 500
+
+    website_link = f"{website_url}/virtual_number?referral={referral_token}"
+    return render_template("mini_app.html", website_link=website_link)
 
 
 @app.route("/virtual_number", methods=["GET", "POST"])
