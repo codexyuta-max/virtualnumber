@@ -79,6 +79,40 @@ def get_user_credits(user_id):
     return int((user or {}).get("credits", 0))
 
 
+def reward_referrer(referrer_id, referred_user_id, first_time):
+    """Give the referrer two credits once for each new, non-self referral."""
+    if not first_time or referrer_id == referred_user_id:
+        return False
+
+    # A referral is valid only when its owner has already used the bot.
+    if not users_collection.find_one({"telegram_id": referrer_id}, {"_id": 1}):
+        return False
+
+    marked = users_collection.update_one(
+        {"telegram_id": referred_user_id, "referred_by": {"$exists": False}},
+        {"$set": {"referred_by": referrer_id, "referred_at": datetime.now(timezone.utc)}},
+    )
+    if not marked.modified_count:
+        return False
+
+    users_collection.update_one(
+        {"telegram_id": referrer_id},
+        {"$inc": {"credits": 2}, "$set": {"updated_at": datetime.now(timezone.utc)}},
+    )
+    return True
+
+
+async def notify_referrer(referrer_id):
+    """Tell the referrer that a completed referral earned two credits."""
+    try:
+        await telegram_bot.send_message(
+            referrer_id,
+            "<b>🎉 2 credit Added From your refer</b>",
+        )
+    except RPCError:
+        LOGGER.warning("Could not notify referrer %s about earned credits", referrer_id)
+
+
 def create_referral_token(user_id):
     """Create a one-use personal link that expires after 15 minutes."""
     now = datetime.now(timezone.utc)
@@ -181,7 +215,10 @@ telegram_bot = None
 
 WELCOME_TEXT = (
     "<b>Welcome!</b>\n\n"
-    "/link — Generate Location Finder Link"
+    "<b>Available commands:</b>\n"
+    "/link — Generate Location Finder Link\n"
+    "/refer — Get your referral link\n"
+    "/credit — Check your current credits"
 )
 
 
@@ -254,7 +291,7 @@ def google_maps_link(latitude, longitude):
     return f"https://www.google.com/maps?q={latitude:.6f},{longitude:.6f}"
 
 
-def join_keyboard(missing_channels):
+def join_keyboard(missing_channels, referrer_id=None):
     """Match the coloured button layout used by your other Kurigram bot."""
     return InlineKeyboardMarkup(
         [
@@ -264,7 +301,10 @@ def join_keyboard(missing_channels):
         + [[
             InlineKeyboardButton(
                 "✅ Joined",
-                callback_data="verify_subscription",
+                callback_data=(
+                    f"verify_subscription:{referrer_id}"
+                    if referrer_id else "verify_subscription"
+                ),
                 style=ButtonStyle.SUCCESS,
             )
         ]]
@@ -320,16 +360,30 @@ async def process_join_request(_, join_request: ChatJoinRequest):
 async def start_command(_, message: Message):
     if not message.from_user:
         return
+    command_parts = message.command or []
+    start_payload = command_parts[1] if len(command_parts) > 1 else ""
+    referrer_id = None
+    if start_payload.startswith("ref_") and start_payload[4:].isdigit():
+        referrer_id = int(start_payload[4:])
+
     missing_channels = await missing_required_channels(message.from_user.id)
     if missing_channels:
-        await message.reply_text(JOIN_TEXT, reply_markup=join_keyboard(missing_channels))
+        await message.reply_text(JOIN_TEXT, reply_markup=join_keyboard(missing_channels, referrer_id))
         return
     try:
         first_time = await asyncio.to_thread(save_user_data, message.from_user)
+        referral_rewarded = await asyncio.to_thread(
+            reward_referrer, referrer_id, message.from_user.id, first_time
+        ) if referrer_id else False
     except Exception:
         LOGGER.exception("Could not save verified Telegram user %s", message.from_user.id)
         first_time = False
-    await message.reply_text(welcome_text(first_time))
+        referral_rewarded = False
+    reply = welcome_text(first_time)
+    if referral_rewarded:
+        reply += "\n\n🎉 Your referrer received 2 credits."
+        await notify_referrer(referrer_id)
+    await message.reply_text(reply)
 
 
 async def verify_subscription(_, callback_query: CallbackQuery):
@@ -339,12 +393,66 @@ async def verify_subscription(_, callback_query: CallbackQuery):
         return
     try:
         first_time = await asyncio.to_thread(save_user_data, callback_query.from_user)
+        callback_data = callback_query.data or ""
+        referrer_value = callback_data.partition(":")[2]
+        referrer_id = int(referrer_value) if referrer_value.isdigit() else None
+        referral_rewarded = await asyncio.to_thread(
+            reward_referrer, referrer_id, callback_query.from_user.id, first_time
+        ) if referrer_id else False
     except Exception:
         LOGGER.exception("Could not save verified Telegram user %s", callback_query.from_user.id)
         first_time = False
+        referral_rewarded = False
     await callback_query.answer("Membership verified!")
     await callback_query.message.delete()
-    await callback_query.message.reply_text(welcome_text(first_time))
+    reply = welcome_text(first_time)
+    if referral_rewarded:
+        reply += "\n\n🎉 Your referrer received 2 credits."
+        await notify_referrer(referrer_id)
+    await callback_query.message.reply_text(reply)
+
+
+async def refer_command(_, message: Message):
+    """Create a referral link containing the current user's Telegram ID."""
+    if not message.from_user:
+        return
+    missing_channels = await missing_required_channels(message.from_user.id)
+    if missing_channels:
+        await message.reply_text(JOIN_TEXT, reply_markup=join_keyboard(missing_channels))
+        return
+
+    try:
+        await asyncio.to_thread(save_user_data, message.from_user)
+        bot_info = await telegram_bot.get_me()
+    except Exception:
+        LOGGER.exception("Could not create referral link for user %s", message.from_user.id)
+        await message.reply_text("Unable to create your referral link right now. Please try again later.")
+        return
+
+    referral_url = f"https://t.me/{bot_info.username}?start=ref_{message.from_user.id}"
+    await message.reply_text(
+        "<b>🎁 Your referral link</b>\n\n"
+        f"<code>{referral_url}</code>\n\n"
+        "Share it with a new user. When they start the bot, you receive <b>2 credits</b>."
+    )
+
+
+async def credit_command(_, message: Message):
+    """Show the subscriber's current credit balance."""
+    if not message.from_user:
+        return
+    missing_channels = await missing_required_channels(message.from_user.id)
+    if missing_channels:
+        await message.reply_text(JOIN_TEXT, reply_markup=join_keyboard(missing_channels))
+        return
+
+    try:
+        credits = await asyncio.to_thread(get_user_credits, message.from_user.id)
+    except Exception:
+        LOGGER.exception("Could not read credits for Telegram user %s", message.from_user.id)
+        await message.reply_text("Unable to check your credits right now. Please try again later.")
+        return
+    await message.reply_text(f"<b>💳 Your current credits: {credits}</b>")
 
 
 async def link_command(_, message: Message):
@@ -400,7 +508,13 @@ def run_telegram_bot():
         MessageHandler(link_command, filters.command("link") & filters.private)
     )
     telegram_bot.add_handler(
-        CallbackQueryHandler(verify_subscription, filters.regex("^verify_subscription$"))
+        MessageHandler(refer_command, filters.command("refer") & filters.private)
+    )
+    telegram_bot.add_handler(
+        MessageHandler(credit_command, filters.command("credit") & filters.private)
+    )
+    telegram_bot.add_handler(
+        CallbackQueryHandler(verify_subscription, filters.regex("^verify_subscription(?::\\d+)?$"))
     )
     telegram_bot.add_handler(ChatJoinRequestHandler(process_join_request))
     # Client.run() calls Pyrogram's idle(), which registers OS signal handlers.
