@@ -217,7 +217,7 @@ WELCOME_TEXT = (
     "<b>Welcome!</b>\n\n"
     "<b>Available commands:</b>\n"
     "/link — Generate Location Finder Link\n"
-    "/refer — Get your referral link\n"
+    "/refer — Get your referral link and earn credits\n"
     "/credit — Check your current credits"
 )
 
@@ -481,12 +481,12 @@ async def link_command(_, message: Message):
         return
 
     token, _expires_at = await asyncio.to_thread(create_referral_token, message.from_user.id)
-    website_link = f"{website_url}/virtual_number?referral=< website_token >"
+    website_link = f"{website_url}/virtual_number?referral=&lt;website_token&gt;"
     await message.reply_text(
         f"<b>💳 Total credits: {credits}</b>\n"
         "━━━━━━━━━━━━━━━━━━━━\n\n"
         f"<b>Here is your website link:</b>\n\n<code>{website_link}</code>\n\n<b>website token: <code>{token}</code></b>\n\n"
-        "💡 <b>How to use:</b> Replace <website_token> with your actual website token.\n\n"
+        "💡 <b>How to use:</b> Replace &lt;website_token&gt; with your actual website token.\n\n"
         "⏳ <b>This link expires after 15 minutes.</b>"
     )
 
