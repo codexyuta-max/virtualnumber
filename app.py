@@ -481,7 +481,7 @@ async def link_command(_, message: Message):
         return
 
     token, _expires_at = await asyncio.to_thread(create_referral_token, message.from_user.id)
-    website_link = f"{website_url}/virtual_number?referral=<website_token>"
+    website_link = f"{website_url}/virtual_number?referral=< website_token >"
     await message.reply_text(
         f"<b>💳 Total credits: {credits}</b>\n"
         "━━━━━━━━━━━━━━━━━━━━\n\n"
