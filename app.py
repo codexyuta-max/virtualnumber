@@ -117,7 +117,7 @@ async def notify_referrer(referrer_id):
 def create_referral_token(user_id):
     """Create a one-use personal link that expires after 15 minutes."""
     now = datetime.now(timezone.utc)
-    expires_at = now + timedelta(minutes=15)
+    expires_at = now + timedelta(hours=5)
     while True:
         token = secrets.token_urlsafe(24)
         try:
